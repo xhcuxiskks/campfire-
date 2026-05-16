@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>篝火</title>
+    <style>
+        :root {
+            --bg-dark: #0a0608;
+            --game-bg: #0d0810;
+            --col-merlin: #6ab7ff;
+            --col-arthur: #ff6b6b;
+            --col-gold: #d4af37;
+            --col-text: #ffffff;
+            --zi-sky: 0;
+            --zi-mountain: 5;
+            --zi-ground: 10;
+            --zi-props: 20;
+            --zi-character: 30;
+            --zi-ui: 100;
+            --zi-story: 200;
+            --zi-puzzle: 300;
+            --zi-cover: 400;
+            --zi-return: 450;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Serif SC", "Source Han Serif SC", serif;
+        }
+
+        #game {
+            position: relative;
+            width: min(100vw, 177.78vh);
+            height: min(56.25vw, 100vh);
+            background: var(--game-bg);
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        /* ================= 环境层 ================= */
+        #sky {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, #0a0510 0%, #150d20 40%, #1a0f18 70%, #251020 100%);
+            z-index: var(--zi-sky);
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle var(--dur) ease-in-out infinite alternate;
+        }
+        @keyframes twinkle {
+            from {
+                opacity: var(--a1);
+                transform: scale(1);
+            }
+            to {
+                opacity: var(--a2);
+                transform: scale(0.6);
+            }
+        }
+
+        #mountains {
+            position: absolute;
+            bottom: 35%;
+            left: 0;
+            right: 0;
+            height: 28%;
+            opacity: 0.6;
+            z-index: var(--zi-mountain);
+        }
+        #mountains svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        #grass-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 36%;
+            height: 3px;
+            z-index: var(--zi-ground);
+            background: repeating-linear-gradient(90deg,
+                    #2a1f1a 0px, #2a1f1a 6px,
+                    #1f1612 6px, #1f1612 12px);
+        }
+
+        #ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 36%;
+            z-index: var(--zi-ground);
+            background: linear-gradient(180deg, #1a0f14 0%, #120a10 60%, #0d0810 100%);
+        }
+
+        /* ================= 篝火与道具层 ================= */
+        #campfire-group {
+            position: absolute;
+            bottom: 28%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: var(--zi-props);
+            width: 80px;
+            height: 80px;
+        }
+
+        #firelight {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 200px;
+            height: 80px;
+            animation: lightpulse 1.1s ease-in-out infinite alternate;
+            background: radial-gradient(ellipse at 50% 80%,
+                    rgba(200, 80, 20, .18) 0%,
+                    rgba(180, 60, 10, .08) 40%,
+                    transparent 70%);
+        }
+        @keyframes lightpulse {
+            from {
+                opacity: .7;
+                transform: translateX(-50%) scaleX(1);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) scaleX(1.08);
+            }
+        }
+
+        #flames-wrapper {
+            position: absolute;
+            inset: 0;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-origin: bottom center;
+        }
+        .fire-size-1 {
+            transform: scale(0.6);
+        }
+        .fire-size-2 {
+            transform: scale(1.0);
+        }
+        .fire-size-3 {
+            transform: scale(1.6);
+        }
+
+        .flame {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            border-radius: 50% 50% 20% 20%;
+            animation: flicker var(--spd) ease-in-out infinite alternate;
+            transform-origin: bottom center;
+        }
+        @keyframes flicker {
+            0% {
+                transform: translateX(-50%) scale(1, 1) skewX(0deg);
+            }
+            25% {
+                transform: translateX(-52%) scale(0.9, 1.05) skewX(-2deg);
+            }
+            50% {
+                transform: translateX(-48%) scale(1.1, 0.95) skewX(1deg);
+            }
+            75% {
+                transform: translateX(-51%) scale(0.95, 1.02) skewX(2deg);
+            }
+            100% {
+                transform: translateX(-50%) scale(1, 1) skewX(-1deg);
+            }
+        }
+
+        #flame-outer {
+            --spd: 0.9s;
+            width: 36px;
+            height: 44px;
+            opacity: .85;
+            background: radial-gradient(ellipse at 50% 90%, #e05010 0%, #c03008 40%, transparent 75%);
+        }
+        #flame-mid {
+            --spd: 0.7s;
+            width: 24px;
+            height: 32px;
+            bottom: 10px;
+            background: radial-gradient(ellipse at 50% 85%, #f08020 0%, #e06010 50%, transparent 80%);
+        }
+        #flame-inner {
+            --spd: 0.5s;
+            width: 14px;
+            height: 20px;
+            bottom: 12px;
+            background: radial-gradient(ellipse at 50% 80%, #fff5a0 0%, #ffd040 50%, transparent 85%);
+        }
+
+        #logs {
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 48px;
+            height: 10px;
+        }
+        #logs::before,
+        #logs::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 30px;
+            height: 5px;
+            background: #3d2010;
+            border-radius: 2px;
+        }
+        #logs::before {
+            left: 0;
+            transform: rotate(-20deg);
+            transform-origin: left bottom;
+        }
+        #logs::after {
+            right: 0;
+            transform: rotate(20deg);
+            transform-origin: right bottom;
+        }
+
+        #cloak {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #8e1a1a;
+            left: 18%;
+            bottom: 29%;
+            border-radius: 2px;
+            opacity: 0;
+            transition: all 0.5s ease-in-out;
+            border: 2px solid var(--col-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: var(--zi-props);
+        }
+        #cloak::after {
+            content: '';
+            width: 6px;
+            height: 8px;
+            background: var(--col-gold);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        #meat-stick {
+            position: absolute;
+            bottom: 32%;
+            left: 65%;
+            width: 45px;
+            height: 6px;
+            background: #8c5333;
+            border-radius: 3px;
+            cursor: grab;
+            z-index: var(--zi-props);
+            display: none;
+            transition: transform 0.1s linear;
+        }
+        #meat-stick::after {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: -4px;
+            width: 20px;
+            height: 14px;
+            background: #592202;
+            border-radius: 6px;
+            box-shadow: inset -3px -3px 0 #3a1702;
+        }
+
+        /* ================= 角色层 ================= */
+        .character {
+            position: absolute;
+            bottom: 30%;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: var(--zi-character);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        #merlin-box {
+            left: 20%;
+            background: #227093;
+            animation: breathe 3.8s ease-in-out infinite;
+            animation-delay: .6s;
+        }
+        #arthur-box {
+            right: -50px;
+            background: #b33939;
+            animation: breathe 3.2s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        /* ================= 剧情UI层 ================= */
+        #story-box {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75%;
+            min-height: 60px;
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 8px;
+            padding: 14px 20px;
+            font-size: 13px;
+            line-height: 1.5;
+            cursor: pointer;
+            z-index: var(--zi-story);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: none;
+        }
+        #text-content {
+            color: var(--col-text);
+            transition: color 0.3s ease;
+            white-space: pre-line;
+        }
+
+        #fire-hint {
+            position: absolute;
+            bottom: 17%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(212, 175, 55, .7);
+            font-size: 11px;
+            z-index: var(--zi-ui);
+            display: none;
+            text-align: center;
+            width: 80%;
+            pointer-events: none;
+        }
+
+        #fire-ui {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            z-index: var(--zi-ui);
+        }
+        #fire-label {
+            color: rgba(212, 175, 55, .8);
+            font-size: 11px;
+            letter-spacing: .12em;
+            font-weight: bold;
+        }
+        #fire-bar {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, .08);
+            border: 1px solid rgba(212, 175, 55, .15);
+            position: relative;
+        }
+        #fire-fill {
+            height: 100%;
+            width: 50%;
+            background: linear-gradient(90deg, #c07020, #ffc840);
+            transition: width 0.05s linear;
+        }
+        .zone {
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: rgba(212, 175, 55, .3);
+        }
+
+        .word-fragment {
+            position: absolute;
+            padding: 6px 12px;
+            background: rgba(13, 8, 16, 0.95);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            color: var(--col-gold);
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: var(--zi-puzzle);
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.15);
+        }
+        .word-fragment.selected {
+            border-color: #4090ff;
+            color: #4090ff;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* ================= 粒子 ================= */
+        .spark {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ffd060;
+            border-radius: 50%;
+            animation: spark-fly var(--t) ease-out forwards;
+            pointer-events: none;
+            z-index: var(--zi-props);
+        }
+        @keyframes spark-fly {
+            0% {
+                opacity: 1;
+                transform: translate(var(--sx), 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(var(--sx) * 1.5), -60px) scale(0.3);
+            }
+        }
+
+        .smoke {
+            position: absolute;
+            left: 50%;
+            bottom: 52px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(180, 150, 140, .15);
+            animation: smoke-rise var(--st) ease-out forwards;
+            pointer-events: none;
+            z-index: var(--zi-props);
+        }
+        @keyframes smoke-rise {
+            0% {
+                opacity: .4;
+                transform: translateX(var(--sx)) scale(1) translateY(0);
+            }
+            50% {
+                opacity: .2;
+                transform: translateX(calc(var(--sx) * .5)) scale(2.5) translateY(-30px);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(calc(var(--sx) * 2)) scale(4) translateY(-70px);
+            }
+        }
+
+        .float-text {
+            position: absolute;
+            color: #fff;
+            font-size: 12px;
+            pointer-events: none;
+            animation: floatUp 1.2s ease-out forwards;
+            z-index: var(--zi-puzzle);
+        }
+        @keyframes floatUp {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+        }
+
+        .magic-glow {
+            box-shadow: 0 0 20px 5px #ffd700 !important;
+        }
+        .fire-danger {
+            animation: dangerPulse .5s ease-in-out infinite alternate;
+        }
+        @keyframes dangerPulse {
+            from {
+                filter: drop-shadow(0 0 5px rgba(255, 80, 0, .5));
+            }
+            to {
+                filter: drop-shadow(0 0 20px rgba(255, 80, 0, .9));
+            }
+        }
+
+        /* ================= 封面层 ================= */
+        #cover-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: var(--zi-cover);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at 50% 55%, rgba(30, 12, 8, 0.7) 0%, rgba(8, 4, 10, 0.95) 70%);
+            gap: 20px;
+        }
+
+        #cover-title {
+            font-size: clamp(36px, 7vw, 64px);
+            font-weight: bold;
+            color: #f4b860;
+            letter-spacing: 0.15em;
+            text-shadow: 0 0 40px rgba(220, 130, 40, 0.5), 0 0 80px rgba(200, 100, 20, 0.3), 0 0 120px rgba(255, 160, 40, 0.2);
+            animation: titleGlow 2.5s ease-in-out infinite alternate;
+            cursor: default;
+        }
+        @keyframes titleGlow {
+            from {
+                text-shadow: 0 0 30px rgba(220, 130, 40, 0.4), 0 0 60px rgba(200, 100, 20, 0.25), 0 0 100px rgba(255, 160, 40, 0.15);
+            }
+            to {
+                text-shadow: 0 0 50px rgba(240, 160, 50, 0.6), 0 0 90px rgba(220, 120, 30, 0.35), 0 0 140px rgba(255, 180, 50, 0.25);
+            }
+        }
+
+        #cover-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .cover-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: rgba(220, 190, 140, 0.8);
+            padding: 10px 32px;
+            font-size: 15px;
+            letter-spacing: 0.1em;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            font-family: inherit;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+        .cover-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(240, 180, 60, 0.55);
+            color: rgba(255, 210, 150, 0.95);
+            box-shadow: 0 0 30px rgba(200, 120, 30, 0.25);
+            transform: translateY(-1px);
+        }
+        .cover-btn:active {
+            transform: scale(0.97);
+            transition: transform 0.1s;
+        }
+
+        /* ================= 返回按钮（极隐蔽） ================= */
+        .return-btn {
+            position: absolute;
+            top: 10px;
+            left: 14px;
+            z-index: var(--zi-return);
+            background: none;
+            border: none;
+            color: rgba(180, 160, 150, 0.13);
+            font-size: 10px;
+            cursor: pointer;
+            padding: 6px 10px;
+            letter-spacing: 0.06em;
+            font-family: inherit;
+            transition: color 0.5s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .return-btn:hover {
+            color: rgba(200, 180, 160, 0.5);
+            transition: color 0.25s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game">
+
+        <!-- 环境层 -->
+        <div id="sky"></div>
+        <div id="mountains">
+            <svg viewBox="0 0 320 60" preserveAspectRatio="none">
+                <polygon points="0,60 30,20 55,38 80,10 110,35 145,5 175,28 210,15 240,32 270,8 295,22 320,18 320,60" fill="#160d18" />
+                <polygon points="0,60 20,35 50,48 85,28 120,42 155,22 185,38 220,25 255,40 285,20 310,32 320,28 320,60" fill="#1a1020" />
+            </svg>
+        </div>
+        <div id="grass-line"></div>
+        <div id="ground"></div>
+
+        <!-- 篝火 -->
+        <div id="campfire-group">
+            <div id="firelight"></div>
+            <div id="flames-wrapper" class="fire-size-2">
+                <div class="flame" id="flame-outer"></div>
+                <div class="flame" id="flame-mid"></div>
+                <div class="flame" id="flame-inner"></div>
+            </div>
+            <div id="logs"></div>
+        </div>
+
+        <!-- 道具 -->
+        <div id="cloak"></div>
+        <div id="meat-stick"></div>
+
+        <!-- 角色 -->
+        <div id="merlin-box" class="character"></div>
+        <div id="arthur-box" class="character"></div>
+
+        <!-- 剧情UI -->
+        <div id="story-box">
+            <div id="text-content">法师醒来时已是深夜，篝火噼里啪啦地响，空气中还时不时传来烤肉的香气。</div>
+        </div>
+        <div id="fire-hint"></div>
+        <div id="fire-ui">
+            <div id="fire-label">— 克制魔法，稳住火焰 —</div>
+            <div id="fire-bar">
+                <div id="fire-fill"></div>
+                <div class="zone" style="left:32%;"></div>
+                <div class="zone" style="left:68%;"></div>
+            </div>
+        </div>
+
+        <!-- 封面 -->
+        <div id="cover-overlay">
+            <div id="cover-title">篝 火</div>
+            <div id="cover-buttons">
+                <button class="cover-btn" id="btn-idle">发呆模式</button>
+                <button class="cover-btn" id="btn-story">剧情模式</button>
+            </div>
+        </div>
+
+        <!-- 返回按钮（极隐蔽） -->
+        <button class="return-btn" id="return-btn" style="display:none;">← 返回</button>
+
+    </div>
+
+    <script>
+        (function() {
+            // ==================== DOM引用 ====================
+            const game = document.getElementById('game');
+            const sky = document.getElementById('sky');
+            const coverOverlay = document.getElementById('cover-overlay');
+            const returnBtn = document.getElementById('return-btn');
+            const flamesWrapper = document.getElementById('flames-wrapper');
+            const fireGroup = document.getElementById('campfire-group');
+            const storyBox = document.getElementById('story-box');
+            const textEl = document.getElementById('text-content');
+            const fireHint = document.getElementById('fire-hint');
+            const fireUI = document.getElementById('fire-ui');
+            const fireFill = document.getElementById('fire-fill');
+            const merlinBox = document.getElementById('merlin-box');
+            const arthurBox = document.getElementById('arthur-box');
+            const cloak = document.getElementById('cloak');
+            const meatStick = document.getElementById('meat-stick');
+            const btnIdle = document.getElementById('btn-idle');
+            const btnStory = document.getElementById('btn-story');
+
+            // ==================== 状态 ====================
+            let currentMode = 'cover'; // 'cover' | 'idle' | 'story'
+            let fireLevel = 2;
+            let idleIntervals = [];
+            let storyCleanupFn = null;
+
+            // ==================== 星空初始化 ====================
+            function initStars() {
+                const fragment = document.createDocumentFragment();
+                for (let i = 0; i < 60; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    const size = Math.random() < 0.15 ? 2 : 1;
+                    star.style.cssText = `
+                width:${size}px;
+                height:${size}px;
+                top:${Math.random()*55}%;
+                left:${Math.random()*100}%;
+                --dur:${1.5+Math.random()*2.5}s;
+                --a1:${0.3+Math.random()*0.6};
+                --a2:${0.05+Math.random()*0.2};
+                animation-delay:${Math.random()*3}s;
+              `;
+                    fragment.appendChild(star);
+                }
+                sky.appendChild(fragment);
+            }
+            initStars();
+
+            // ==================== 粒子工具 ====================
+            function spawnSpark() {
+                const spark = document.createElement('div');
+                spark.className = 'spark';
+                spark.style.cssText = `
+              --sx:${(Math.random()-0.5)*30}px;
+              --t:${0.8+Math.random()*0.8}s;
+              left:${46+Math.random()*8}%;
+              bottom:10px;
+            `;
+                fireGroup.appendChild(spark);
+                setTimeout(() => spark.remove(), 1800);
+            }
+
+            function spawnSmoke() {
+                const smoke = document.createElement('div');
+                smoke.className = 'smoke';
+                smoke.style.cssText = `
+              --sx:${(Math.random()-0.5)*20}px;
+              --st:${2+Math.random()*1.5}s;
+              bottom:${52+Math.random()*4}px;
+            `;
+                fireGroup.appendChild(smoke);
+                setTimeout(() => smoke.remove(), 3600);
+            }
+
+            function startIdleParticles() {
+                stopIdleParticles();
+                const i1 = setInterval(spawnSpark, 300);
+                const i2 = setInterval(spawnSmoke, 600);
+                idleIntervals = [i1, i2];
+            }
+
+            function stopIdleParticles() {
+                idleIntervals.forEach(clearInterval);
+                idleIntervals = [];
+            }
+
+            // ==================== 火焰点击（发呆模式） ====================
+            function onFlameClick(e) {
+                if (currentMode !== 'idle') return;
+                e.stopPropagation();
+                fireLevel = fireLevel >= 3 ? 1 : fireLevel + 1;
+                flamesWrapper.className = `fire-size-${fireLevel}`;
+            }
+
+            // ==================== 模式切换 ====================
+            function resetCharacterPositions() {
+                // 恢复角色默认外观
+                merlinBox.style.cssText = '';
+                merlinBox.className = 'character';
+                merlinBox.id = 'merlin-box';
+                merlinBox.style.left = '20%';
+                merlinBox.style.background = '#227093';
+                merlinBox.style.animation = 'breathe 3.8s ease-in-out infinite';
+                merlinBox.style.animationDelay = '.6s';
+                merlinBox.style.boxShadow = '0 4px 10px rgba(0,0,0,0.5)';
+
+                arthurBox.style.cssText = '';
+                arthurBox.className = 'character';
+                arthurBox.id = 'arthur-box';
+                arthurBox.style.right = '-50px';
+                arthurBox.style.left = 'auto';
+                arthurBox.style.background = '#b33939';
+                arthurBox.style.animation = 'breathe 3.2s ease-in-out infinite';
+                arthurBox.style.animationDelay = '0s';
+                arthurBox.style.boxShadow = '0 4px 10px rgba(0,0,0,0.5)';
+            }
+
+            function resetIdleCharacterPositions() {
+                // 发呆模式：两个角色在屏幕两侧可见
+                merlinBox.style.cssText = '';
+                merlinBox.className = 'character';
+                merlinBox.style.right = '14%';
+                merlinBox.style.left = 'auto';
+                merlinBox.style.background = '#227093';
+                merlinBox.style.animation = 'breathe 3.8s ease-in-out infinite';
+                merlinBox.style.animationDelay = '.6s';
+                merlinBox.style.boxShadow = '0 4px 10px rgba(0,0,0,0.5)';
+                merlinBox.style.transform = '';
+
+                arthurBox.style.cssText = '';
+                arthurBox.className = 'character';
+                arthurBox.style.left = '14%';
+                arthurBox.style.right = 'auto';
+                arthurBox.style.background = '#b33939';
+                arthurBox.style.animation = 'breathe 3.2s ease-in-out infinite';
+                arthurBox.style.animationDelay = '0s';
+                arthurBox.style.boxShadow = '0 4px 10px rgba(0,0,0,0.5)';
+                arthurBox.style.transform = '';
+            }
+
+            function switchToMode(mode) {
+                // 清理
+                stopIdleParticles();
+                if (storyCleanupFn) {
+                    storyCleanupFn();
+                    storyCleanupFn = null;
+                }
+                // 清理碎片
+                game.querySelectorAll('.word-fragment').forEach(el => el.remove());
+                game.querySelectorAll('.float-text').forEach(el => el.remove());
+
+                // 隐藏剧情UI
+                storyBox.style.display = 'none';
+                fireHint.style.display = 'none';
+                fireUI.style.display = 'none';
+                cloak.style.opacity = '0';
+                cloak.style.transform = '';
+                meatStick.style.display = 'none';
+                meatStick.style.transform = 'translate(0,0)';
+                flamesWrapper.classList.remove('fire-danger');
+                merlinBox.classList.remove('magic-glow');
+                arthurBox.classList.remove('magic-glow');
+
+                currentMode = mode;
+
+                if (mode === 'cover') {
+                    coverOverlay.style.display = 'flex';
+                    returnBtn.style.display = 'none';
+                    flamesWrapper.className = 'fire-size-2';
+                    fireLevel = 2;
+                    resetCharacterPositions();
+                    textEl.innerText = '法师醒来时已是深夜，篝火噼里啪啦地响，空气中还时不时传来烤肉的香气。';
+                    textEl.style.color = 'var(--col-text)';
+                }
+
+                if (mode === 'idle') {
+                    coverOverlay.style.display = 'none';
+                    returnBtn.style.display = 'block';
+                    flamesWrapper.className = 'fire-size-2';
+                    fireLevel = 2;
+                    resetIdleCharacterPositions();
+                    startIdleParticles();
+                }
+
+                if (mode === 'story') {
+                    coverOverlay.style.display = 'none';
+                    returnBtn.style.display = 'block';
+                    flamesWrapper.className = 'fire-size-2';
+                    fireLevel = 2;
+                    resetCharacterPositions();
+                    initStoryMode();
+                }
+            }
+
+            // ==================== 剧情模式 ====================
+            let currentNode = 0;
+            let isMinigameActive = false;
+            let storyAbortController = null;
+
+            const storyNodes = [
+                { name: "梅林", text: "他动了动胳膊，腹部的剧痛使他想起今天的遭遇。伤口已经被处理过，上面扎了根暗红的布条。那个骑士在哪里？",
+                    action: () => { merlinBox.style.transform = "rotate(-90deg)"; } },
+                { name: "梅林", text: "他挣扎着起来，什么东西从他身上滑下。金色的龙镶在大红披风上，像是显赫着无法违抗的皇权。",
+                    action: () => { merlinBox.style.transform = "rotate(0deg) translateX(20%)";
+                        merlinBox.style.left = "28%";
+                        merlinBox.style.right = "auto";
+                        cloak.style.opacity = "1"; } },
+                { name: "梅林", text: "看清的那一刻他猛地一推，那是所有法师最恐惧的东西，卡美洛特骑士的披风。",
+                    action: () => { cloak.style.transform = "translate(-60px, 20px) rotate(-45deg)";
+                        cloak.style.opacity = "0"; } },
+                { name: "亚瑟", text: "亚瑟拎着水壶从树林里走出来。\"不喜欢我的披风也不要乱扔啊，这有多难得到你知不知道。\"",
+                    action: () => { arthurBox.style.right = "28%";
+                        arthurBox.style.left = "auto"; } },
+                { name: "梅林", text: "\"不过是多杀几个会魔法的人。\"法师幽幽看着他。亚瑟可以感受到他冰冷的语气后隐藏的汹涌怒意。",
+                    action: () => { flamesWrapper.className = "fire-size-3"; } },
+                { name: "亚瑟", text: "\"魔法是邪恶的。魔法杀死了我的母亲。\"", action: () => { flamesWrapper.className =
+                            "fire-size-1"; } },
+                { name: "梅林", text: "\"但也可以医治她。如果不是国王的禁令，很多精通治疗术的德鲁伊根本不必逃离卡美洛特。\"",
+                action: () => {} },
+                { name: "旁白", text: "【交互任务：长按屏幕压制失控的火焰】\n空气陷入沉默。篝火噼里啪啦叫得更响了。烤肉焦味传来时，亚瑟面露难色。此时火焰因梅林的强烈心绪而濒临失控……",
+                    action: () => { startFireGame(); } },
+                { name: "旁白", text: "【交互任务：向左拖拽烤肉串递给梅林】\n火焰终于被法师用意志压制了下来。亚瑟反应过来，手忙脚乱地救出可怜的烤肉。给。他递过插肉的木棍。",
+                    action: () => { initMeatDrag(); } },
+                { name: "梅林", text: "兔子？", action: () => {} },
+                { name: "亚瑟", text: "\"没下毒，不吃我吃。\"亚瑟撕了块肉兀自嚼起来。", action: () => { flamesWrapper.className =
+                        "fire-size-2"; } },
+                { name: "旁白", text: "\"我叫亚瑟，你叫什么。\"\n\n男孩努力吞咽着嘴里的肉，发出含糊不清的声音，\"梅...林\"。", action: () => { flamesWrapper
+                            .className = "fire-size-3"; } },
+                { name: "亚瑟", text: "你真的是法师吗？我是说你为什么不用魔法变出食物...之类的。或者，你现在可以念个咒杀了我。",
+                action: () => { flamesWrapper.className = "fire-size-3"; } },
+                { name: "梅林", text: "梅林像被逗笑了，他停下牙齿跟肉的战斗。你觉得我会杀你？他的眼眸流转过一道若有若无的金光，不知是火光倒映还是其他。",
+                    action: () => { merlinBox.classList.add('magic-glow'); } },
+                { name: "亚瑟", text: "亚瑟挠挠头。我父亲总是教导我所有德鲁伊都邪恶狡猾心狠手辣，也许你是想把我折磨致死？他玩笑着向男孩眨眨眼。难不成你法力太弱只能变戏法？",
+                    action: () => { merlinBox.classList.remove('magic-glow'); } },
+                { name: "梅林", text: "梅林垂下眼，再次看亚瑟时，他的眼睛又变回了深不见底的蓝色。你为什么不杀我。法师低沉的声音令亚瑟浑身一颤。",
+                    action: () => { merlinBox.classList.remove('magic-glow');
+                        initSilencePuzzle(); } },
+                { name: "亚瑟",
+                    text: "因为...我看到了你眼睛里的恐惧。这让我想起了自己。他没有透露更多。作为卡美洛特的皇储，他一直被乌瑟以最严格的标准对待。但隐隐他又觉得父亲治理卡美洛特的做法并不正确。他太渴望得到乌瑟的认可，但他又对自己做的事怀疑唾弃。亚瑟知道他成为不了他父亲，卡美洛特伟大的国王。尽管他是卡美洛特最优秀的骑士，他知道他的内里一直如莫甘娜嘲笑的一样软弱。",
+                    action: () => {} },
+                { name: "梅林", text: "我想，如果情势不同...梅林的声音轻得像是从远方飘来，我们也许会成为朋友。", action: () => { arthurBox.style.right =
+                            "32%";
+                        arthurBox.style.left = "auto"; } },
+                { name: "亚瑟", text: "亚瑟捻了捻手中的草，随意往火堆一扔。也许吧...", action: () => { arthurBox.style.right = "32%";
+                        arthurBox.style.left = "auto"; } }
+            ];
+
+
+            function pulseCharacter(id) {
+                const el = document.getElementById(id);
+                const currentTransform = window.getComputedStyle(el).transform;
+                const baseTransform = currentTransform !== 'none' ? currentTransform : '';
+                el.style.transition = "transform 0.1s cubic-bezier(0.4, 0, 0.2, 1)";
+                el.style.transform = `${baseTransform} translateY(-5px)`;
+                setTimeout(() => {
+                    el.style.transform = baseTransform;
+                    el.style.transition = "all 1s cubic-bezier(0.4, 0, 0.2, 1)";
+                }, 100);
+            }
+
+            function advanceStory() {
+                if (currentNode < storyNodes.length) {
+                    const node = storyNodes[currentNode];
+                    const colors = {
+                        "旁白": "var(--col-text)",
+                        "梅林": "var(--col-merlin)",
+                        "亚瑟": "var(--col-arthur)"
+                    };
+                    textEl.style.color = colors[node.name] || "var(--col-text)";
+                    textEl.innerText = node.text;
+                    if (typeof node.action === "function") node.action();
+                    if (node.name === "梅林") pulseCharacter('merlin-box');
+                    if (node.name === "亚瑟") pulseCharacter('arthur-box');
+                    currentNode++;
+                } else {
+                    textEl.innerText = "（嗖）";
+                    textEl.style.color = "#888888";
+                }
+            }
+
+            function onStoryBoxClick() {
+                if (currentMode !== 'story') return;
+                if (isMinigameActive) return;
+                advanceStory();
+            }
+
+            function checkCollision(rect1, rect2) {
+                return !(rect1.right < rect2.left ||
+                    rect1.left > rect2.right ||
+                    rect1.bottom < rect2.top ||
+                    rect1.top > rect2.bottom);
+            }
+
+            function startFireGame() {
+                isMinigameActive = true;
+                fireUI.style.display = "flex";
+                fireHint.style.display = "block";
+                fireHint.innerText = "长按屏幕压制魔力，保持在安全区间";
+                let power = 50;
+                let isPressing = false;
+                let gameLoop;
+                let lastTime = performance.now();
+                let surviveTime = 0;
+                const ac = new AbortController();
+                const opts = { signal: ac.signal };
+
+                game.addEventListener('pointerdown', () => { isPressing = true; }, opts);
+                game.addEventListener('pointerup', () => { isPressing = false; }, opts);
+                game.addEventListener('pointerleave', () => { isPressing = false; }, opts);
+
+                function loop(ct) {
+                    const dt = (ct - lastTime) / 1000;
+                    lastTime = ct;
+                    const velocity = isPressing ? -35 : 40;
+                    power += velocity * dt;
+                    power = Math.max(0, Math.min(100, power));
+                    fireFill.style.width = `${power}%`;
+                    if (power > 68 || power < 32) {
+                        fireFill.style.background = "#ff3333";
+                        flamesWrapper.classList.add('fire-danger');
+                        surviveTime = 0;
+                    } else {
+                        fireFill.style.background = "linear-gradient(90deg, #c07020, #ffc840)";
+                        flamesWrapper.classList.remove('fire-danger');
+                        surviveTime += dt;
+                    }
+                    if (surviveTime > 3.5) {
+                        cancelAnimationFrame(gameLoop);
+                        ac.abort();
+                        fireUI.style.display = "none";
+                        fireHint.style.display = "none";
+                        flamesWrapper.classList.remove('fire-danger');
+                        flamesWrapper.className = "fire-size-1";
+                        isMinigameActive = false;
+                        advanceStory();
+                        return;
+                    }
+                    gameLoop = requestAnimationFrame(loop);
+                }
+                gameLoop = requestAnimationFrame(loop);
+
+                // 注册清理
+                storyCleanupFn = () => {
+                    cancelAnimationFrame(gameLoop);
+                    ac.abort();
+                    fireUI.style.display = "none";
+                    fireHint.style.display = "none";
+                    flamesWrapper.classList.remove('fire-danger');
+                    isMinigameActive = false;
+                };
+            }
+
+            function initMeatDrag() {
+                isMinigameActive = true;
+                meatStick.style.display = "block";
+                meatStick.style.transform = "translate(0,0)";
+                let isDragging = false;
+                let startX, startY;
+                let ctX = 0,
+                    ctY = 0;
+                const ac = new AbortController();
+                const opts = { signal: ac.signal };
+
+                meatStick.addEventListener('pointerdown', (e) => {
+                    isDragging = true;
+                    meatStick.style.transition = "none";
+                    startX = e.clientX - ctX;
+                    startY = e.clientY - ctY;
+                    meatStick.setPointerCapture(e.pointerId);
+                }, opts);
+
+                game.addEventListener('pointermove', (e) => {
+                    if (!isDragging) return;
+                    ctX = e.clientX - startX;
+                    ctY = e.clientY - startY;
+                    meatStick.style.transform = `translate(${ctX}px, ${ctY}px)`;
+                }, opts);
+
+                meatStick.addEventListener('pointerup', (e) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    meatStick.style.transition = "transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)";
+                    meatStick.releasePointerCapture(e.pointerId);
+                    const mr = meatStick.getBoundingClientRect();
+                    const tr = merlinBox.getBoundingClientRect();
+                    if (checkCollision(mr, tr)) {
+                        ac.abort();
+                        meatStick.style.display = "none";
+                        isMinigameActive = false;
+                        advanceStory();
+                    } else {
+                        ctX = 0;
+                        ctY = 0;
+                        meatStick.style.transform = "translate(0,0)";
+                    }
+                }, opts);
+
+                storyCleanupFn = () => {
+                    ac.abort();
+                    meatStick.style.display = "none";
+                    isMinigameActive = false;
+                };
+            }
+
+            function initSilencePuzzle() {
+                isMinigameActive = true;
+                const words = ["你", "为", "什", "么", "不", "杀", "我"];
+                let currentIndex = 0;
+                const fragContainer = document.createElement('div');
+                fireHint.style.display = "block";
+                fireHint.innerText = "收集散落的思绪以打破沉默";
+
+                words.forEach((word, index) => {
+                    const el = document.createElement('div');
+                    el.className = 'word-fragment';
+                    el.innerText = word;
+                    const x = Math.random() < 0.5 ? Math.random() * 25 + 5 : Math.random() * 25 + 60;
+                    const y = Math.random() * 40 + 20;
+                    el.style.left = `${x}%`;
+                    el.style.top = `${y}%`;
+                    el.dataset.index = index;
+                    el.addEventListener('click', function(e) {
+                        if (parseInt(this.dataset.index) === currentIndex) {
+                            this.classList.add('selected');
+                            const ft = document.createElement('div');
+                            ft.className = 'float-text';
+                            ft.innerText = this.innerText;
+                            ft.style.left = `${e.clientX}px`;
+                            ft.style.top = `${e.clientY}px`;
+                            document.body.appendChild(ft);
+                            setTimeout(() => ft.remove(), 1200);
+                            currentIndex++;
+                            if (currentIndex === words.length) {
+                                setTimeout(() => {
+                                    fragContainer.remove();
+                                    fireHint.style.display = "none";
+                                    isMinigameActive = false;
+                                    advanceStory();
+                                }, 500);
+                            }
+                        } else {
+                            fireHint.innerText = "思绪未对齐，需重新梳理";
+                            currentIndex = 0;
+                            Array.from(fragContainer.children).forEach(child => {
+                                child.classList.remove('selected');
+                                child.style.transform = "translateX(-5px)";
+                                setTimeout(() => child.style.transform = "translateX(0)",
+                                    100);
+                            });
+                        }
+                    });
+                    fragContainer.appendChild(el);
+                });
+                game.appendChild(fragContainer);
+
+                storyCleanupFn = () => {
+                    fragContainer.remove();
+                    fireHint.style.display = "none";
+                    isMinigameActive = false;
+                };
+            }
+
+            function initStoryMode() {
+                currentNode = 0;
+                isMinigameActive = false;
+                storyCleanupFn = null;
+                storyBox.style.display = "block";
+                textEl.innerText = "法师醒来时已是深夜，篝火噼里啪啦地响，空气中还时不时传来烤肉的香气。";
+                textEl.style.color = "var(--col-text)";
+                fireHint.style.display = "none";
+                fireUI.style.display = "none";
+                cloak.style.opacity = "0";
+                cloak.style.transform = "";
+                meatStick.style.display = "none";
+                meatStick.style.transform = "translate(0,0)";
+                flamesWrapper.classList.remove('fire-danger');
+                flamesWrapper.className = "fire-size-2";
+                merlinBox.classList.remove('magic-glow');
+                arthurBox.classList.remove('magic-glow');
+                merlinBox.style.left = '20%';
+                merlinBox.style.right = 'auto';
+                merlinBox.style.transform = '';
+                arthurBox.style.right = '-50px';
+                arthurBox.style.left = 'auto';
+                arthurBox.style.transform = '';
+                // 清理碎片
+                game.querySelectorAll('.word-fragment').forEach(el => el.remove());
+                game.querySelectorAll('.float-text').forEach(el => el.remove());
+            }
+
+            // // ==================== 事件绑定 (兼容 Koder / WKWebView) ====================
+function bindBoth(el, handler) {
+    el.addEventListener('click', handler);
+    el.addEventListener('touchend', function(e) {
+        e.preventDefault();  // 阻止可能的默认手势（如缩放）
+        handler(e);
+    });
+}
+
+bindBoth(flamesWrapper, onFlameClick);
+bindBoth(storyBox, onStoryBoxClick);
+bindBoth(returnBtn, () => switchToMode('cover'));
+bindBoth(btnIdle, () => switchToMode('idle'));
+bindBoth(btnStory, () => switchToMode('story'));
+
+            // ==================== 初始状态 ====================
+            switchToMode('cover');
+
+            
+        })();
+    </script>
+</body>
+</html>
